@@ -89,11 +89,7 @@ class DiscoverySpider(scrapy.Spider):
                     }
                     
                     # Envia para a fila do Celery/Redis
-                    run_product_scraping.delay(
-                        user=self.settings.get('SERVIMED_USER'), 
-                        password=self.settings.get('SERVIMED_PASS'),
-                        **dados_empresa
-                    )
+                    run_product_scraping.delay(**dados_empresa)
                     self.logger.info(f"Fila -> Empresa: {dados_empresa['razao']}")
 
                     yield dados_empresa

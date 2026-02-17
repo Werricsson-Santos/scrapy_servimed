@@ -4,10 +4,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+redis_url = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+
 app = Celery('servimed', 
-             broker=os.getenv('REDIS_URL', 'redis://redis:6379/0'),
+             broker=redis_url,
+             backend=redis_url,
              include=['tasks']
-             )
+            )
 
 app.conf.update(
     task_serializer='json',

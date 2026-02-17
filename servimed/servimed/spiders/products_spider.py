@@ -32,10 +32,10 @@ class ProductSpider(scrapy.Spider):
             "estoque": item.get("quantidadeEstoque")
         }
 
-    def __init__(self, user=None, password=None, razao=None, cliente_id=None, external_id=None, *args, **kwargs):
+    def __init__(self, razao=None, cliente_id=None, external_id=None, *args, **kwargs):
         super(ProductSpider, self).__init__(*args, **kwargs)
-        self.user = user or os.getenv("SERVIMED_USER")
-        self.password = password or os.getenv("SERVIMED_PASS")
+        self.user = os.getenv("SERVIMED_USER")
+        self.password = os.getenv("SERVIMED_PASS")
         self.razao = razao
         self.cliente_id = cliente_id
         self.external_id = external_id

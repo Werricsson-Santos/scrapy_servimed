@@ -25,7 +25,9 @@ services:
   flower:
     image: mher/flower
     container_name: flower-servimed
-    command: python3 -m celery --broker=redis://redis:6379/0 flower
+    command: python3 -m celery --broker=redis://redis:6379/0 --result-backend=redis://redis:6379/0 flower
+    environment:
+      - CELERY_FLOWER_TASK_PROPERTIES=task_id,name,state,result,received,runtime
     ports:
       - "5555:5555"
     depends_on:
