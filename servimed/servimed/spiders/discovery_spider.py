@@ -81,18 +81,21 @@ class DiscoverySpider(scrapy.Spider):
                 self.logger.info(f"Encontradas {len(empresas)} empresas.")
 
                 for empresa in empresas:
-                    razao = empresa.get('razaoSocial')
-                    cliente_id = empresa.get('codigo')
-                    external_id = empresa.get('codigoExterno')
+                    dados_empresa = {
+                        "razao": empresa.get('razaoSocial'),
+                        "cliente_id": empresa.get('codigo'),
+                        "external_id": empresa.get('codigoExterno'),
+                        "situacao": empresa.get('situacao')
+                    }
                     
                     # Envia para a fila do Celery/Redis
                     run_product_scraping.delay(
                         user=self.settings.get('SERVIMED_USER'), 
                         password=self.settings.get('SERVIMED_PASS'),
-                        razao=razao,
-                        cliente_id=cliente_id,
-                        external_id=external_id
+                        **dados_empresa
                     )
-                    self.logger.info(f"Fila -> Empresa: {razao}")
+                    self.logger.info(f"Fila -> Empresa: {dados_empresa['razao']}")
+
+                    yield dados_empresa
             else:
                 self.logger.error(f"Erro ao buscar empresas: {res.status_code} - {res.text}")

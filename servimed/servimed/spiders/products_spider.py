@@ -110,6 +110,7 @@ class ProductSpider(scrapy.Spider):
                 self.logger.info(f"dados obtidos {json.dumps(data)[:500]}...")  # Log parcial dos dados para debug
                 total_registros = int(data.get('totalRegistros'))
                 total_paginas = (total_registros // 25) + (1 if total_registros % 25 > 0 else 0)
+                # total_paginas = 1 # Forçar 1 página para testes
                 
                 self.logger.info(f"Total para {self.razao} | {self.cliente_id}: {total_registros} itens em {total_paginas} páginas.")
 

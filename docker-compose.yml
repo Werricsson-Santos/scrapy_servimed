@@ -9,7 +9,7 @@ services:
   worker:
     build: .
     environment:
-      - PYTHONPATH=/app:/app/servimed
+      - PYTHONPATH=.:$PYTHONPATH
     working_dir: /app/servimed
     container_name: celery-worker
     command: python3 -m celery -A celery_app worker --loglevel=info
@@ -17,6 +17,9 @@ services:
       - redis
     env_file:
       - .env
+    volumes:
+      - .:/app
+      - ./extractions:/app/servimed/extractions
 
   # O Flower para monitorar as tarefas (Opcional)
   flower:

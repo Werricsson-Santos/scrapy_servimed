@@ -19,6 +19,17 @@ NEWSPIDER_MODULE = "servimed.spiders"
 SERVIMED_PASS=os.getenv('SERVIMED_PASS')
 SERVIMED_USER=os.getenv('SERVIMED_USER')
 
+FEEDS = {
+    # Incluir o /%(time)s após o name, apenas em testes, porque em produção a paginação demora e queremos apenas 1 arquivo no final da execução.
+    'extractions/%(name)s.json': { 
+        'format': 'jsonlines',
+        'encoding': 'utf8',
+        'store_empty': False,
+        'indent': 4,
+        'overwrite': False,
+    }
+}
+
 
 ADDONS = {}
 
