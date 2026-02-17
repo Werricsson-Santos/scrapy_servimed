@@ -151,15 +151,16 @@ class ProductSpider(scrapy.Spider):
                                 "estoque": item.get("estoque")
                             })
                     else:
-                        self.logger.error(f"Erro na pág {pag} de {self.razao}: {res_pag.status_code}")
+                        self.logger.error(f"Erro na pág {pag} de {self.razao} | {self.cliente_id}: {res_pag.status_code}")
 
                 # --- YIELD FINAL APÓS TODAS AS PÁGINAS ---
                 if produtos_acumulados:
-                    self.logger.info(f"Finalizado: {len(produtos_acumulados)} produtos para {self.razao}")
+                    self.logger.info(f"Finalizado: {len(produtos_acumulados)} produtos para {self.razao} | {self.cliente_id}")
                     yield {
                         "empresa_nome": self.razao,
                         "empresa_codigo": self.cliente_id,
+                        "empresa_codigo_externo": self.external_id,
                         "produtos": produtos_acumulados
                     }
             else:
-                self.logger.error(f"Erro no login/carrinho de {self.razao}: {res_initial.status_code}")
+                self.logger.error(f"Erro no login/carrinho de {self.razao} | {self.cliente_id}: {res_initial.status_code}")
