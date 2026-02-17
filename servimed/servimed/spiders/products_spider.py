@@ -17,8 +17,20 @@ def gerar_x_cart(payload, timestamp):
     ).hexdigest()
     return signature
 
+
+
 class ProductSpider(scrapy.Spider):
     name = 'product_spider'
+
+    def extrair_dados_produto(self, item):
+        """Padroniza a extração dos dados do produto vindo da API Servimed."""
+        return {
+            "gtin": item.get("codigoBarras"),
+            "codigo": item.get("codigoExterno"),
+            "descricao": item.get("descricao"),
+            "preco_fabrica": item.get("valorBase"),
+            "estoque": item.get("quantidadeEstoque")
+        }
 
     def __init__(self, user=None, password=None, razao=None, cliente_id=None, external_id=None, *args, **kwargs):
         super(ProductSpider, self).__init__(*args, **kwargs)
@@ -110,19 +122,14 @@ class ProductSpider(scrapy.Spider):
                 self.logger.info(f"dados obtidos {json.dumps(data)[:500]}...")  # Log parcial dos dados para debug
                 total_registros = int(data.get('totalRegistros'))
                 total_paginas = (total_registros // 25) + (1 if total_registros % 25 > 0 else 0)
-                # total_paginas = 1 # Forçar 1 página para testes
+                total_paginas = 1 # Forçar 1 página para testes
                 
                 self.logger.info(f"Total para {self.razao} | {self.cliente_id}: {total_registros} itens em {total_paginas} páginas.")
 
                 # Processa a primeira página já obtida
                 for item in data.get('lista', []):
-                    produtos_acumulados.append({
-                        "gtin": item.get("gtin"),
-                        "codigo": item.get("codigo"),
-                        "descricao": item.get("descricao"),
-                        "preco_fabrica": item.get("precoFabrica"),
-                        "estoque": item.get("estoque")
-                    })
+                    # self.logger.debug(f"Produto encontrado: {json.dumps(item)}")
+                    produtos_acumulados.append(self.extrair_dados_produto(item))
 
                 # B: Loop para as demais páginas (se houver)
                 for pag in range(2, total_paginas + 1):
@@ -144,13 +151,8 @@ class ProductSpider(scrapy.Spider):
 
                     if res_pag.status_code == 200:
                         for item in res_pag.json().get('lista', []):
-                            produtos_acumulados.append({
-                                "gtin": item.get("gtin"),
-                                "codigo": item.get("codigo"),
-                                "descricao": item.get("descricao"),
-                                "preco_fabrica": item.get("precoFabrica"),
-                                "estoque": item.get("estoque")
-                            })
+                            # self.logger.debug(f"Produto encontrado: {json.dumps(item)}")  # Log detalhado de cada produto"
+                            produtos_acumulados.append(self.extrair_dados_produto(item))
                     else:
                         self.logger.error(f"Erro na pág {pag} de {self.razao} | {self.cliente_id}: {res_pag.status_code}")
 
