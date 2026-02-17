@@ -6,11 +6,18 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BOT_NAME = "servimed"
 
 SPIDER_MODULES = ["servimed.spiders"]
 NEWSPIDER_MODULE = "servimed.spiders"
+
+SERVIMED_PASS=os.getenv('SERVIMED_PASS')
+SERVIMED_USER=os.getenv('SERVIMED_USER')
 
 
 ADDONS = {}

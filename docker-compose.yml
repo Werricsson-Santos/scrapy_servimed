@@ -1,0 +1,29 @@
+services:
+  redis:
+    image: redis:alpine
+    container_name: redis-servimed
+    ports:
+      - "6379:6379"
+
+  # O Worker que processa a raspagem
+  worker:
+    build: .
+    environment:
+      - PYTHONPATH=/app:/app/servimed
+    working_dir: /app/servimed
+    container_name: celery-worker
+    command: python3 -m celery -A celery_app worker --loglevel=info
+    depends_on:
+      - redis
+    env_file:
+      - .env
+
+  # O Flower para monitorar as tarefas (Opcional)
+  flower:
+    image: mher/flower
+    container_name: flower-servimed
+    command: python3 -m celery --broker=redis://redis:6379/0 flower
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
