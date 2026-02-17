@@ -30,6 +30,10 @@ FEEDS = {
     }
 }
 
+ITEM_PIPELINES = {
+    'servimed.pipelines.CoteFacilPipeline': 300,
+}
+
 
 ADDONS = {}
 
