@@ -102,7 +102,7 @@ class ServimedSpider(scrapy.Spider):
                 # if empresa.get('situacao') != 'ATIVO':
                 #     continue
                 
-                cliente_id = empresa.get('id')
+                cliente_id = empresa.get('codigo')
                 codigo_externo = empresa.get('codigoExterno')
                 razao_social = empresa.get('razaoSocial')
                 
