@@ -102,7 +102,7 @@ class ServimedSpider(scrapy.Spider):
                 # if empresa.get('situacao') != 'ATIVO':
                 #     continue
                 
-                cliente_id = empresa.get('codigo')
+                cliente_id = empresa.get('id')
                 codigo_externo = empresa.get('codigoExterno')
                 razao_social = empresa.get('razaoSocial')
                 
@@ -154,7 +154,7 @@ class ServimedSpider(scrapy.Spider):
                 if res_total.status_code == 200:
                     total_registros = int(res_total.json().get('totalRegistros', 0))
                     total_paginas = (total_registros // itens_por_pagina) + (1 if total_registros % itens_por_pagina > 0 else 0)
-                    total_paginas = 1
+                    # total_paginas = 1  # Para testes, limitar a 1 página
 
                     self.logger.info(f"Total de registros para {razao_social}: {total_registros}. Total de páginas: {total_paginas}")
 
@@ -186,11 +186,11 @@ class ServimedSpider(scrapy.Spider):
                             for item in dados_lista:
                                 # Filtra apenas os atributos desejados e faz o push na lista da empresa
                                 produtos_acumulados.append({
-                                    "gtin": item.get("gtin"),
-                                    "codigo": item.get("codigo"),
+                                    "gtin": item.get("codigoBarras"),
+                                    "codigo": item.get("codigoExterno"),
                                     "descricao": item.get("descricao"),
-                                    "preco_fabrica": item.get("precoFabrica"),
-                                    "estoque": item.get("estoque")
+                                    "preco_fabrica": item.get("valorBase"),
+                                    "estoque": item.get("quantidadeEstoque")
                                 })
                         else:
                             self.logger.error(f"Erro na pág {pag} de {razao_social}: {res_cart.status_code}")
