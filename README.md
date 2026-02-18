@@ -145,14 +145,8 @@ docker exec -it celery-worker scrapy crawl discovery
 <pre><code><a href="http://localhost:5555">http://localhost:5555</a>
 </code></pre>
 
-<h4>4. Executar outros Spiders</h4>
-<pre><code># Spider de produtos
-scrapy crawl product_spider
-
-# Outros spiders disponíveis
-scrapy crawl servimed_spider
-scrapy crawl cotefacil_spider
-</code></pre>
+<p>A arquitetura do projeto funciona em um fluxo contínuo de três etapas. Primeiro, um Discovery Worker mapeia todas as empresas disponíveis na Servimed e enfileira as tarefas no Celery.</p> 
+<p> Em seguida, workers assíncronos assumem essas tarefas, raspando o catálogo de cada cliente e acionando um Pipeline que, em tempo real, gerencia a autenticação e o envio dos produtos para a <a href="https://desafio.cotefacil.net/docs#/">API do desafio.</a></p>
 
 <h2>📊 Monitoramento</h2>
 
