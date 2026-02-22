@@ -32,13 +32,15 @@ class ProductSpider(scrapy.Spider):
             "estoque": item.get("quantidadeEstoque")
         }
 
-    def __init__(self, razao=None, cliente_id=None, external_id=None, *args, **kwargs):
+    def __init__(self, razao=None, cnpj=None, cliente_id=None, external_id=None, *args, **kwargs):
         super(ProductSpider, self).__init__(*args, **kwargs)
         self.user = os.getenv("SERVIMED_USER")
         self.password = os.getenv("SERVIMED_PASS")
         self.razao = razao
+        self.cnpj = cnpj
         self.cliente_id = cliente_id
         self.external_id = external_id
+
 
         self.logger.info(f"argumentos recebidos - user: {self.user}, razao: {self.razao}, cliente_id: {self.cliente_id}, external_id: {self.external_id}")
 
@@ -88,6 +90,7 @@ class ProductSpider(scrapy.Spider):
             }
 
             produtos_acumulados = []
+            produtos_originais = []  # Para debug, manter o JSON cru vindo da API
             itens_por_pagina = 50
             
             # Payload base para o Carrinho Oculto
@@ -130,6 +133,7 @@ class ProductSpider(scrapy.Spider):
                 for item in data.get('lista', []):
                     # self.logger.debug(f"Produto encontrado: {json.dumps(item)}")
                     produtos_acumulados.append(self.extrair_dados_produto(item))
+                    produtos_originais.append(item)
 
                 # B: Loop para as demais páginas (se houver)
                 for pag in range(2, total_paginas + 1):
@@ -153,6 +157,7 @@ class ProductSpider(scrapy.Spider):
                         for item in res_pag.json().get('lista', []):
                             # self.logger.debug(f"Produto encontrado: {json.dumps(item)}")  # Log detalhado de cada produto"
                             produtos_acumulados.append(self.extrair_dados_produto(item))
+                            produtos_originais.append(item)
                     else:
                         self.logger.error(f"Erro na pág {pag} de {self.razao} | {self.cliente_id}: {res_pag.status_code}")
 
@@ -160,10 +165,12 @@ class ProductSpider(scrapy.Spider):
                 if produtos_acumulados:
                     self.logger.info(f"Finalizado: {len(produtos_acumulados)} produtos para {self.razao} | {self.cliente_id}")
                     yield {
-                        "empresa_nome": self.razao,
-                        "empresa_codigo": self.cliente_id,
-                        "empresa_codigo_externo": self.external_id,
-                        "produtos": produtos_acumulados
+                        "cliente_nome": self.razao,
+                        "cnpj": self.cnpj,
+                        "cliente_id": self.cliente_id,
+                        "cliente_external_id": self.external_id,
+                        "produtos": produtos_acumulados,
+                        "produtos_originais": produtos_originais
                     }
             else:
                 self.logger.error(f"Erro no login/carrinho de {self.razao} | {self.cliente_id}: {res_initial.status_code}")
