@@ -83,6 +83,7 @@ class DiscoverySpider(scrapy.Spider):
                 for empresa in empresas:
                     dados_empresa = {
                         "razao": empresa.get('razaoSocial'),
+                        "cnpj": empresa.get('cnpj'),
                         "cliente_id": empresa.get('codigo'),
                         "external_id": empresa.get('codigoExterno'),
                         "situacao": empresa.get('situacao')
