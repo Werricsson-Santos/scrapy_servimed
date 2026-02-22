@@ -1,4 +1,4 @@
-<h1 align="center">🕷️ Servimed Scraper (Nível 2 - Intermediário)</h1>
+<h1 align="center">🕷️ Servimed Scraper (Nível 3 - Avançado)</h1>
 
 <p align='center'>
     <a href="http://localhost:5555">
@@ -26,6 +26,7 @@
     <li><a href="#-uso">📱 Uso</a></li>
     <li><a href="#-monitoramento">📊 Monitoramento</a></li>
     <li><a href="#️-arquitetura">🏗️ Arquitetura</a></li>
+    <li><a href="#-testes-automatizados">🧪 Testes Automatizados</a></li>
     <li><a href="#-estrutura-do-projeto">📁 Estrutura do Projeto</a></li>
     <li><a href="#-troubleshooting">🐛 Troubleshooting</a></li>
 </ul>
@@ -41,6 +42,7 @@
     <li>✅ <strong>Autenticação</strong> automática na API Servimed</li>
     <li>✅ <strong>Spider de descoberta</strong> para mapear empresas</li>
     <li>✅ <strong>Spider de produtos</strong> para extrair catálogos</li>
+    <li>✅ <strong>Pedido de compras automático</strong></li>
 </ul>
 
 <h2>🔧 Pré-requisitos</h2>
@@ -77,7 +79,7 @@ cd scrapy_servimed
 
 <h3>2. Mudar para a branch correta</h3>
 <p><strong>⚠️ Importante:</strong> Por padrão, o clone vem na branch <code>master</code>. Para utilizar este projeto, você deve mudar para a branch de desenvolvimento:</p>
-<pre><code>git checkout feature/nivel-2-celery-redis
+<pre><code>git checkout feature/nivel-3-avancado
 </code></pre>
 
 <h3>3. Configure as variáveis de ambiente</h3>
@@ -139,8 +141,15 @@ redis-servimed        docker-entrypoint.sh redis ...   Up      0.0.0.0:6379-&gt;
 docker exec -it celery-worker scrapy crawl discovery
 </code></pre>
 
+<p><strong>✨ Novidade do Nível 3:</strong> O spider de descoberta agora após a raspagem dos produtos, gera um pedido de compra aleatório através da <a href="https://desafio.cotefacil.net/docs#">API do desafio</a>, faz o mapeamento do pedido aleatório gerado, com os produtos originais extraídos, realiza o pedido de compras na Servimed e retorna a confirmação do pedido realizado para a <a href="https://desafio.cotefacil.net/docs#">API do cote fácil</a>, sem necessidade de comando adicional do usuário.</p>
+
 <h4>3. Verificar os resultados</h4>
-<p>Após a execução, verifique os arquivos gerados, você deve ver os arquivos gerados na pasta <strong>"extractions"</strong></p>
+<p>Após a execução, verifique os arquivos gerados, você deve ver os arquivos gerados na pasta <strong>"extractions"</strong>, incluindo automaticamente os dados de <strong>ordens de pedido</strong>:</p>
+<ul>
+    <li><strong>discovery.json:</strong> Empresas descobertas</li>
+    <li><strong>order_spider.json:</strong> Ordens de pedido (gerado automaticamente)</li>
+    <li><strong>product_spider.json:</strong> Produtos disponíveis</li>
+</ul>
 <p><strong>Você também pode ver um resumo dos resultados através do Flower:</strong></p>
 <pre><code><a href="http://localhost:5555">http://localhost:5555</a>
 </code></pre>
@@ -212,19 +221,132 @@ graph TB
     <li><strong>🐳 Docker:</strong> Containerização e orquestração</li>
 </ul>
 
+<h2>🧪 Testes Automatizados</h2>
+
+<p>O projeto inclui uma suíte completa de testes automatizados com <strong>pytest</strong> para garantir qualidade e confiabilidade do código.</p>
+
+<h3>🔧 Configuração dos Testes</h3>
+
+<p>Os testes estão organizados por categoria:</p>
+<ul>
+    <li><strong>🎯 Testes Unitários:</strong> Funções individuais e módulos isolados</li>
+    <li><strong>🔗 Testes de Integração:</strong> Interações entre componentes</li>
+    <li><strong>🕷️ Testes de Spiders:</strong> Comportamento dos scrapers Scrapy</li>
+    <li><strong>⚙️ Testes de Tasks:</strong> Funcionalidade do Celery</li>
+</ul>
+
+<h3>📊 Executando os Testes</h3>
+
+<h4>Windows (Recomendado)</h4>
+<pre><code># Todos os testes
+test.bat
+
+# Apenas testes unitários (rápido)
+test.bat --fast
+
+# Com relatório de cobertura
+test.bat --coverage
+
+# Apenas testes de integração
+test.bat --integration
+</code></pre>
+
+<h4>Linux/macOS ou Manual</h4>
+<pre><code># Instalar dependências de teste
+pip install -r requirements.txt
+
+# Todos os testes
+python -m pytest
+
+# Testes unitários apenas
+python -m pytest -m unit
+
+# Com cobertura de código
+python -m pytest --cov=servimed --cov-report=html
+
+# Testes específicos por marcação
+python -m pytest -m "celery or scrapy"
+
+# Executar arquivo específico
+python -m pytest tests/test_celery_app.py -v
+</code></pre>
+
+<h3>📈 Relatório de Cobertura</h3>
+
+<p>Após executar testes com <code>--coverage</code>, o relatório HTML estará disponível:</p>
+<pre><code># Visualizar relatório
+start htmlcov\index.html  # Windows
+open htmlcov/index.html    # macOS
+xdg-open htmlcov/index.html # Linux
+
+# Ou servir via HTTP
+python -m http.server 8000
+# Acesse: http://localhost:8000/htmlcov/
+</code></pre>
+
+<h3>🏷️ Marcações dos Testes</h3>
+
+<ul>
+    <li><code>@pytest.mark.unit</code> - Testes unitários rápidos</li>
+    <li><code>@pytest.mark.integration</code> - Testes de integração</li>
+    <li><code>@pytest.mark.celery</code> - Testes relacionados ao Celery</li>
+    <li><code>@pytest.mark.scrapy</code> - Testes dos spiders Scrapy</li>
+    <li><code>@pytest.mark.api</code> - Testes que simulam chamadas de API</li>
+</ul>
+
+<h3>🛠️ Estrutura dos Testes</h3>
+
+<pre><code>tests/
+├── __init__.py
+├── conftest.py              # Fixtures e configurações
+├── test_celery_app.py       # Testes do Celery
+├── test_tasks.py            # Testes das tasks
+├── test_spiders.py          # Testes dos spiders
+└── test_utils.py            # Testes de utilitários
+</code></pre>
+
+<h3>🔍 Exemplo de Saída dos Testes</h3>
+
+<pre><code>🧪 Scrapy Servimed - Testes Automatizados
+==========================================
+
+============ test session starts ============
+tests/test_celery_app.py::TestCeleryApp::test_celery_app_creation PASSED [ 25%]
+tests/test_tasks.py::TestFormatarMoeda::test_formatar_valor_float PASSED [ 50%]
+tests/test_spiders.py::TestDiscoverySpider::test_spider_name PASSED [ 75%]
+tests/test_utils.py::TestScrapySettings::test_feeds_configuration PASSED [100%]
+
+============ 4 passed in 2.15s ============
+
+✅ Todos os testes passaram!
+</code></pre>
+
 <h2>📁 Estrutura do Projeto</h2>
 
 <ul>
     <li><strong>docker-compose.yml:</strong> Orquestração dos serviços</li>
     <li><strong>Dockerfile:</strong> Imagem Docker do projeto</li>
     <li><strong>requirements.txt:</strong> Dependências Python</li>
+    <li><strong>pytest.ini:</strong> Configuração dos testes</li>
+    <li><strong>test.bat:</strong> Script de testes para Windows</li>
+    <li><strong>run_tests.py:</strong> Script de testes multiplataforma</li>
     <li><strong>.env:</strong> Variáveis de ambiente (criar)</li>
     <li><strong>README.md:</strong> Esta documentação</li>
     <li><strong>extractions/:</strong> Dados extraídos
         <ul>
             <li><strong>discovery.json:</strong> Resultado do spider de descoberta</li>
+            <li><strong>order_spider.json:</strong> Resultado do spider de pedidos</li>
             <li><strong>product_spider.json:</strong> Resultado do spider de produtos</li>
             <li><strong>discovery/:</strong> Execuções por data</li>
+        </ul>
+    </li>
+    <li><strong>tests/:</strong> Testes automatizados
+        <ul>
+            <li><strong>conftest.py:</strong> Fixtures e configurações de teste</li>
+            <li><strong>test_celery_app.py:</strong> Testes do Celery</li>
+            <li><strong>test_tasks.py:</strong> Testes das tasks assíncronas</li>
+            <li><strong>test_spiders.py:</strong> Testes dos spiders Scrapy</li>
+            <li><strong>test_utils.py:</strong> Testes de utilitários</li>
         </ul>
     </li>
     <li><strong>servimed/:</strong> Código fonte principal
@@ -242,8 +364,8 @@ graph TB
                         <ul>
                             <li><strong>discovery_spider.py:</strong> Spider de descoberta</li>
                             <li><strong>products_spider.py:</strong> Spider de produtos</li>
+                            <li><strong>order_spider.py:</strong> Spider de pedidos</li>
                             <li><strong>servimed_spider.py:</strong> Spider principal</li>
-                            <li><strong>cotefacil_spider.py:</strong> Spider CoTE Fácil</li>
                         </ul>
                     </li>
                 </ul>
@@ -293,6 +415,21 @@ docker-compose exec redis redis-cli ping
     <li>Confirme se a API do Servimed está disponível</li>
     <li>Teste a autenticação manualmente</li>
 </ul>
+
+<h4>6. 🧪 Problemas com Testes</h4>
+<pre><code># Testes falhando por dependências
+pip install -r requirements.txt
+
+# Limpar cache do pytest
+python -m pytest --cache-clear
+
+# Executar apenas um teste específico
+python -m pytest tests/test_celery_app.py::TestCeleryApp::test_celery_app_creation -v
+
+# Problemas com imports nos testes
+export PYTHONPATH="${PYTHONPATH}:${PWD}/servimed"  # Linux/macOS
+set PYTHONPATH=%PYTHONPATH%;%CD%\servimed          # Windows
+</code></pre>
 
 <h3>Comandos Úteis</h3>
 <pre><code># Parar todos os serviços
